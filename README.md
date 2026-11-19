@@ -23,3 +23,89 @@ office_plan — план офисного помещения
 ip_label — таблица портов и адресов
 
 topology — логическая топология
+
+## Текущее состояние проекта (19.11.2026)
+
+### Состав стенда
+
+| ВМ | Назначение | Адрес | Порты |
+|----|------------|-------|-------|
+| IOT-01 | Эмулятор датчиков и логика вентилятора, Node-RED | 192.168.30.10 | 1880 |
+| CTRL-01 | Приёмник показаний receiver.js v3 (с /metrics) | 192.168.20.10 | 8080 |
+| DB-01 | SQLite, приёмник записей и веб-история | 192.168.20.12 | 8081 |
+| MON-01 | Prometheus и Grafana | 192.168.20.11 | 9090, 3000 |
+| WIN-01 | Рабочее место оператора (Windows 10) | 192.168.10.10 | — |
+
+Операционная система ВМ — РЕД ОС 8.0.3 MINIMAL, SELinux отключён.
+
+### Схема обмена данными
+
+```
+TEMP-01, HUM-01 (IOT-01, Node-RED, каждые 5 с)
+        ├── POST /api/readings  ->  CTRL-01:8080  (приёмник, /metrics)
+        │                              └── Prometheus (MON-01) -> Grafana -> письма Email
+        └── POST /api/readings  ->  DB-01:8081    (SQLite, веб-история)
+
+FAN-01: switch "> 30 C" -> POST /api/actuators -> CTRL-01 и DB-01 (state ON/OFF, mode auto)
+```
+
+### Что реализовано в работах 5–8
+
+- Вентилятор FAN-01 включается при температуре выше 30 °C и выключается ниже порога; для каждого
+  состояния используется отдельный узел change с полями `fan.state`, `fan.actuator_id`,
+  `fan.zone`, `fan.mode = auto`.
+- Приёмник CTRL-01 принимает показания и события вентилятора, отдаёт метрики `/metrics` и
+  состояние `/health`.
+- На DB-01 работают приёмник записей и веб-история `http://192.168.20.12:8081`; данные
+  сохраняются в SQLite (`measurements`, `actuator_events`).
+- На MON-01 развёрнуты Prometheus 3.6.0 и Grafana 12.3.1 как системные службы systemd; панель
+  импортирована, настроены три правила оповещения и почтовые уведомления.
+
+### Назначение каталогов
+
+- `nodered/flows.json` — действующий поток Node-RED (16 узлов, одна вкладка).
+- `receiver/` — приёмник CTRL-01: `receiver.js`, `compose.yml`, `dashboard.json`.
+- `storage/` — приёмник записей DB-01: `server.py`, `compose.yml`, `index.html`, схема
+  `schema.sql` и запросы проверки `checks.sql`.
+- `monitoring/` — `prometheus.yml`, `prometheus.service`, `datasource.yml`, `alert-rules.json`,
+  экспорт панели `dashboard.json`.
+- `docs/` — инструкция заказчику и отчёты по работам 5–8.
+- `evidence/` — снимки панели, правил, целей Prometheus, веб-истории, Node-RED, почтового ящика
+  и снимки предыдущих работ.
+- `journal.md` — журнал выполненных работ и испытаний.
+
+### Порядок запуска и проверки
+
+1. **DB-01.** В каталоге `/home/student`: `sqlite3 data/telemetry.sqlite3 < schema.sql`, затем
+   `docker compose up -d` (каталог `data` должен существовать).
+2. **CTRL-01.** `docker compose up -d`; проверить `curl http://localhost:8080/health` и
+   `curl http://localhost:8080/metrics`.
+3. **IOT-01.** Загрузить `nodered/flows.json` в Node-RED или заменить файл в томе
+   `iot_node_red_data` и перезапустить контейнер `node-red`.
+4. **MON-01.** Разместить `monitoring/prometheus.yml` в `/etc/prometheus/`,
+   `monitoring/prometheus.service` в `/etc/systemd/system/`, проверить
+   `promtool check config` и включить службу; `monitoring/datasource.yml` разместить в
+   `/etc/grafana/provisioning/datasources/`.
+5. **Проверка.** Цель `office-controller` — UP; на панели Grafana температура и влажность
+   обновляются каждые 5 секунд, возраст показаний 1–5 с; в веб-истории появляются новые строки;
+   при остановке датчика дольше 20 секунд приходит письмо.
+
+### Адреса
+
+- Редактор Node-RED: http://192.168.30.10:1880
+- Веб-история показаний: http://192.168.20.12:8081
+- Prometheus (цели): http://192.168.20.11:9090/targets
+- Grafana (панель «Office CTRL»): http://192.168.20.11:3000
+- Состояние приёмника CTRL: http://192.168.20.10:8080/health
+
+### Оповещения
+
+Правила группы `office-sensors` срабатывают, если возраст показаний датчика больше 20 секунд при
+доступном CTRL (интервал оценки 10 секунд, Pending 0 секунд). Пропажа самого CTRL отслеживается
+отдельным правилом по метрике `up`. Письма отправляются контактом Email через локальный SMTP
+на MON-01.
+
+### Что не публикуется
+
+Рабочая база `telemetry.sqlite3`, каталоги данных контейнеров, резервные копии и пароли в
+репозиторий не включены.

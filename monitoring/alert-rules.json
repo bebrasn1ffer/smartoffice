@@ -1,0 +1,47 @@
+[
+  {
+    "uid": "temp-age-alert",
+    "title": "TEMP-01: нет новых показаний",
+    "folderUID": "office",
+    "ruleGroup": "office-sensors",
+    "for": "0s",
+    "condition": "C",
+    "noDataState": "OK",
+    "execErrState": "Error",
+    "labels": {"severity": "warning", "sensor": "TEMP-01", "zone": "server_room"},
+    "queries": {
+      "A": "office_sensor_age_seconds{sensor_id=\"TEMP-01\"} and on(job,instance) (up{job=\"office-controller\"} == 1)",
+      "C": "threshold A > 20"
+    }
+  },
+  {
+    "uid": "hum-age-alert",
+    "title": "HUM-01: нет новых показаний",
+    "folderUID": "office",
+    "ruleGroup": "office-sensors",
+    "for": "0s",
+    "condition": "C",
+    "noDataState": "OK",
+    "execErrState": "Error",
+    "labels": {"severity": "warning", "sensor": "HUM-01", "zone": "work_area"},
+    "queries": {
+      "A": "office_sensor_age_seconds{sensor_id=\"HUM-01\"} and on(job,instance) (up{job=\"office-controller\"} == 1)",
+      "C": "threshold A > 20"
+    }
+  },
+  {
+    "uid": "ctrl-down-alert",
+    "title": "CTRL-01 недоступен (up == 0)",
+    "folderUID": "office",
+    "ruleGroup": "office-sensors",
+    "for": "0s",
+    "condition": "C",
+    "noDataState": "OK",
+    "execErrState": "Error",
+    "labels": {"severity": "critical", "component": "CTRL-01"},
+    "queries": {
+      "A": "up{job=\"office-controller\"}",
+      "C": "threshold A < 1"
+    }
+  }
+]

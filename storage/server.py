@@ -15,11 +15,30 @@ EXPECTED = {
   ('zone','TEXT',1,0),('timestamp','INTEGER',1,0),('received_at','INTEGER',1,0),
   ('state','TEXT',1,0),('mode','TEXT',1,0)]
 }
+class Connection:
+ """Context manager: commits on success, rolls back on error and ALWAYS closes.
+
+ sqlite3.Connection used as a context manager only commits; it does not close,
+ so a leaked read transaction would keep the database locked for other writers.
+ """
+ def __init__(self):
+  self.c=sqlite3.connect(DB.resolve().as_uri()+'?mode=rw',uri=True,timeout=15)
+  self.c.row_factory=sqlite3.Row
+  self.c.execute('PRAGMA busy_timeout=15000')
+ def __enter__(self):
+  return self.c
+ def __exit__(self,exc_type,exc,tb):
+  try:
+   if exc_type is None:self.c.commit()
+   else:self.c.rollback()
+  finally:
+   self.c.close()
+  return False
+
+
 def connect():
  # rw opens an EXISTING file and fails rather than silently creating a new DB.
- c=sqlite3.connect(DB.resolve().as_uri()+'?mode=rw',uri=True,timeout=10)
- c.row_factory=sqlite3.Row
- return c
+ return Connection()
 
 def init():
  if not DB.is_file():
@@ -93,6 +112,15 @@ def records(q):
  sql='SELECT * FROM ('+sql+')'+(' WHERE '+' AND '.join(where) if where else '')+' ORDER BY timestamp DESC,kind,id DESC LIMIT ?'
  with connect() as c:return [dict(r) for r in c.execute(sql,args+[limit])]
 
+def ensure_indexes():
+ # Read paths (history, summary) otherwise sort the whole table; a long read
+ # keeps the database locked for the sensor writes.
+ with connect() as c:
+  c.execute('CREATE INDEX IF NOT EXISTS idx_measurements_ts ON measurements(timestamp)')
+  c.execute('CREATE INDEX IF NOT EXISTS idx_measurements_dev_metric_ts ON measurements(device_id, metric, timestamp DESC)')
+  c.execute('CREATE INDEX IF NOT EXISTS idx_actuator_ts ON actuator_events(timestamp DESC)')
+
+
 class Handler(BaseHTTPRequestHandler):
  def send(self,status,body,ctype='application/json; charset=utf-8',headers=None):
   if not isinstance(body,bytes):body=json.dumps(body,ensure_ascii=False,allow_nan=False).encode()
@@ -123,7 +151,11 @@ class Handler(BaseHTTPRequestHandler):
    if u.path=='/api/summary':
     with connect() as c:
      total=c.execute('SELECT (SELECT COUNT(*) FROM measurements)+(SELECT COUNT(*) FROM actuator_events)').fetchone()[0]
-     latest=[dict(r) for r in c.execute('SELECT m.* FROM measurements m WHERE id=(SELECT id FROM measurements x WHERE x.source=m.source AND x.device_id=m.device_id AND x.metric=m.metric ORDER BY timestamp DESC,id DESC LIMIT 1) ORDER BY device_id,metric')]
+     latest=[dict(r) for r in c.execute('''SELECT m.* FROM measurements m
+JOIN (SELECT source, device_id, metric, MAX(timestamp) AS ts FROM measurements
+      GROUP BY source, device_id, metric) g
+  ON g.source=m.source AND g.device_id=m.device_id AND g.metric=m.metric AND g.ts=m.timestamp
+GROUP BY m.device_id, m.metric ORDER BY m.device_id, m.metric''')]
      fan=c.execute('SELECT * FROM actuator_events ORDER BY timestamp DESC,id DESC LIMIT 1').fetchone()
     return self.send(200,{'total':total,'latest':latest,'fan':dict(fan) if fan else None})
    if u.path in ('/api/history','/api/export.csv'):
@@ -151,5 +183,6 @@ if __name__=='__main__':
  try:init()
  except (RuntimeError,sqlite3.Error) as e:
   print('STARTUP ERROR:',e,flush=True);raise SystemExit(1)
+ ensure_indexes()
  print('SQLite storage ready; existing schema verified; no tables created',flush=True)
  ThreadingHTTPServer(('0.0.0.0',int(os.getenv('PORT','8081'))),Handler).serve_forever()
