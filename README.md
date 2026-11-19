@@ -65,6 +65,7 @@ FAN-01: switch "> 30 C" -> POST /api/actuators -> CTRL-01 и DB-01 (state ON/OFF
 
 - `nodered/flows.json` — действующий поток Node-RED (16 узлов, одна вкладка).
 - `receiver/` — приёмник CTRL-01: `receiver.js`, `compose.yml`, `dashboard.json`.
+- `nodered/compose.yml` — compose-файл Node-RED на IOT-01 (сервис `node-red`, том данных).
 - `storage/` — приёмник записей DB-01: `server.py`, `compose.yml`, `index.html`, схема
   `schema.sql` и запросы проверки `checks.sql`.
 - `monitoring/` — `prometheus.yml`, `prometheus.service`, `datasource.yml`, `alert-rules.json`,
@@ -102,8 +103,12 @@ FAN-01: switch "> 30 C" -> POST /api/actuators -> CTRL-01 и DB-01 (state ON/OFF
 
 Правила группы `office-sensors` срабатывают, если возраст показаний датчика больше 20 секунд при
 доступном CTRL (интервал оценки 10 секунд, Pending 0 секунд). Пропажа самого CTRL отслеживается
-отдельным правилом по метрике `up`. Письма отправляются контактом Email через локальный SMTP
-на MON-01.
+отдельным правилом по метрике `up`. Письма отправляются контактом Email на внешний ящик
+`bebrasnifferonly@gmail.com` через SMTP Gmail; пароль приложения хранится только в службе
+Grafana на MON-01.
+
+Важно: IOT-01, CTRL-01 и DB-01 запускаются через `docker compose`, а Prometheus и Grafana
+развёрнуты **системными службами systemd** — docker compose для мониторинга не используется.
 
 ### Что не публикуется
 
