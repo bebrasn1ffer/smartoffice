@@ -73,7 +73,7 @@ FAN-01: switch "> 30 C" -> POST /api/actuators -> CTRL-01 и DB-01 (state ON/OFF
   `schema.sql` и запросы проверки `checks.sql`.
 - `monitoring/` — `prometheus.yml`, `prometheus.service`, `datasource.yml`, `alert-rules.json`,
   экспорт панели `dashboard.json`.
-- `docs/` — инструкция заказчику и отчёты по работам 5–8.
+- `docs/` — инструкция заказчику и отчёты по работам 1–8.
 - `evidence/` — снимки панели, правил, целей Prometheus, веб-истории, Node-RED, почтового ящика
   и снимки предыдущих работ.
 - `journal.md` — журнал выполненных работ и испытаний.
