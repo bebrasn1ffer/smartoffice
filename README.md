@@ -66,6 +66,9 @@ FAN-01: switch "> 30 C" -> POST /api/actuators -> CTRL-01 и DB-01 (state ON/OFF
 - `nodered/flows.json` — действующий поток Node-RED (16 узлов, одна вкладка).
 - `receiver/` — приёмник CTRL-01: `receiver.js`, `compose.yml`, `dashboard.json`.
 - `nodered/compose.yml` — compose-файл Node-RED на IOT-01 (сервис `node-red`, том данных).
+- `network/addressing.md` — таблица адресов и портов стенда.
+- `practice4/` — материалы работ №3–№4: учебный compose-файл с Nginx, журнал приёмника,
+  список контейнеров, протоколы передачи по SCP и проверки Nginx, протокол проверки связности.
 - `storage/` — приёмник записей DB-01: `server.py`, `compose.yml`, `index.html`, схема
   `schema.sql` и запросы проверки `checks.sql`.
 - `monitoring/` — `prometheus.yml`, `prometheus.service`, `datasource.yml`, `alert-rules.json`,
