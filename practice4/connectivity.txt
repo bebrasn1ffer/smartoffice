@@ -1,0 +1,28 @@
+Протокол проверки связности стенда, 20.11.2026.
+
+### docker / compose
+
+Docker version 24.0.9, build afdd53b
+
+Docker Compose version 2.11.2
+
+### sshd
+
+active
+
+### node-red
+
+node-red | nodered/node-red:latest | Up 16 hours (healthy) | 0.0.0.0:1880->1880/tcp, :::1880->1880/tcp
+
+NAME                COMMAND             SERVICE             STATUS              PORTS
+
+node-red            "./entrypoint.sh"   node-red            running (healthy)   0.0.0.0:1880->1880/tcp, :::1880->1880/tcp
+
+node-red http=200
+
+### ssh key for scp
+
+ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAILAqhevVLrCiactTk72HWR3w0TBP6PKDRwU0Kqlts9mr student@IOT-01
+
+
+

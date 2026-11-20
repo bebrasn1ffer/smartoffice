@@ -1,0 +1,21 @@
+Протокол передачи файла с IOT-01 на CTRL-01 по SCP, 20.11.2026 09:25.
+
+На IOT-01 создан ключ ed25519, публичная часть добавлена в ~/.ssh/authorized_keys на CTRL-01.
+Передача:
+
+### scp IOT-01 -> CTRL-01
+
+Warning: Permanently added '192.168.20.10' (ED25519) to the list of known hosts.
+
+exit=0
+
+### verify on CTRL-01
+
+-rw-r--r-- 1 student student 51 ноя 20 09:25 /home/student/scp_test_from_iot.txt
+
+practice4 scp test from IOT-01 2026-11-20 09:25:50
+
+
+
+
+Передача выполнена внутри топологии (VLAN 30 -> VLAN 20), файл на CTRL-01 создан, содержимое совпадает.

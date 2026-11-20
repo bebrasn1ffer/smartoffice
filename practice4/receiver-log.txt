@@ -1,0 +1,15 @@
+Журнал приёмника CTRL-01 (docker compose logs receiver), снят 20.11.2026.
+Показания приходят каждые 5 секунд от двух датчиков, состояния вентилятора — при переключении.
+
+receiver-1  | {"received_at":"2026-11-20T06:24:47.971Z","value":35,"sensor_id":"TEMP-01","zone":"server_room","timestamp":1795155887965,"unit":"C"}
+receiver-1  | {"received_at":"2026-11-20T06:24:47.973Z","value":39.1,"sensor_id":"HUM-01","zone":"work_area","timestamp":1795155887965,"unit":"%"}
+receiver-1  | {"received_at":"2026-11-20T06:24:47.975Z","state":"ON","actuator_id":"FAN-01","zone":"server_room","mode":"auto","timestamp":1795155887969}
+receiver-1  | {"received_at":"2026-11-20T06:24:52.974Z","value":20.9,"sensor_id":"TEMP-01","zone":"server_room","timestamp":1795155892965,"unit":"C"}
+receiver-1  | {"received_at":"2026-11-20T06:24:52.976Z","value":57.6,"sensor_id":"HUM-01","zone":"work_area","timestamp":1795155892965,"unit":"%"}
+receiver-1  | {"received_at":"2026-11-20T06:24:52.977Z","state":"OFF","actuator_id":"FAN-01","zone":"server_room","mode":"auto","timestamp":1795155892969}
+receiver-1  | {"received_at":"2026-11-20T06:24:57.975Z","value":20.4,"sensor_id":"TEMP-01","zone":"server_room","timestamp":1795155897967,"unit":"C"}
+receiver-1  | {"received_at":"2026-11-20T06:24:57.977Z","value":66.5,"sensor_id":"HUM-01","zone":"work_area","timestamp":1795155897967,"unit":"%"}
+receiver-1  | {"received_at":"2026-11-20T06:24:57.982Z","state":"OFF","actuator_id":"FAN-01","zone":"server_room","mode":"auto","timestamp":1795155897972}
+receiver-1  | {"received_at":"2026-11-20T06:25:02.979Z","value":27.6,"sensor_id":"TEMP-01","zone":"server_room","timestamp":1795155902969,"unit":"C"}
+receiver-1  | {"received_at":"2026-11-20T06:25:02.980Z","value":60.3,"sensor_id":"HUM-01","zone":"work_area","timestamp":1795155902969,"unit":"%"}
+receiver-1  | {"received_at":"2026-11-20T06:25:02.980Z","state":"OFF","actuator_id":"FAN-01","zone":"server_room","mode":"auto","timestamp":1795155902971}

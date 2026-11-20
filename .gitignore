@@ -1,0 +1,25 @@
+# рабочая база данных
+*.sqlite3
+*.sqlite
+*.db
+data/
+telemetry.sqlite3-journal
+
+# каталоги данных контейнеров и резервные копии
+backups/
+*.bak
+*.backup
+
+# журналы и временные файлы
+*.log
+*.tmp
+
+# секреты и локальные настройки
+.env
+*.env
+secrets/
+passwords.txt
+
+# служебные файлы ОС
+.DS_Store
+Thumbs.db

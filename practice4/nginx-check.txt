@@ -1,0 +1,87 @@
+Протокол проверки тестового Nginx на CTRL-01, 20.11.2026.
+
+=== 1. Запуск через docker run ===
+### 1. освободить 8080 (остановить приёмник)
+
+[sudo] password for student: student-receiver-1
+
+порт 8080 свободен
+
+### 2. docker run (первая проверка)
+
+a568365d0435b295174bee5c23b0335a9e1cc417705c7c3e72345224d3608d61
+
+curl с CTRL: 200
+
+nginx-run
+
+### 3. docker compose (вторая проверка)
+
+ Container nginx-test  Created
+
+ Container nginx-test  Starting
+
+ Container nginx-test  Started
+
+NAME         IMAGE          COMMAND                  SERVICE      CREATED         STATUS         PORTS
+
+nginx-test   nginx:alpine   "/docker-entrypoint.…"   nginx-test   5 seconds ago   Up 4 seconds   0.0.0.0:8080->80/tcp, :::8080->80/tcp
+
+curl с CTRL: 200
+
+### 4. проверка с IOT-01 выполняется отдельным шагом
+
+### 5. остановить тестовый nginx и вернуть приёмник
+
+ Network practice4_default  Removing
+
+ Network practice4_default  Removed
+
+student-receiver-1
+
+{"status":"ok","version":3,"endpoints":["/api/readings","/api/actuators","/metrics"]}
+
+LISTEN 0      4096         0.0.0.0:8080      0.0.0.0:*          
+
+LISTEN 0      4096            [::]:8080         [::]:*          
+
+
+
+
+=== 2. Проверка с IOT-01 (VLAN 30 -> VLAN 20) ===
+### HTTP с IOT-01 на CTRL-01:8080 (тестовый nginx)
+
+попытка 1: HTTP 200
+
+### заголовки ответа
+
+HTTP/1.1 200 OK
+
+Server: nginx/1.31.8
+
+Date: Fri, 20 Nov 2026 06:27:38 GMT
+
+Content-Type: text/html
+
+Content-Length: 896
+
+Last-Modified: Wed, 21 Oct 2026 17:54:44 GMT
+
+### титул страницы
+
+<title>Welcome to nginx!</title>
+
+
+
+
+=== 3. Остановка тестового Nginx и возврат порта приёмнику ===
+ Network practice4_default  Removing
+
+ Network practice4_default  Removed
+
+student-receiver-1
+
+{"status":"ok","version":3,"endpoints":["/api/readings","/api/actuators","/metrics"]}
+
+
+

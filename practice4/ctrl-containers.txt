@@ -1,0 +1,7 @@
+Контейнеры CTRL-01 (sudo docker compose -f compose.yml ps), 20.11.2026:
+
+NAME                 IMAGE            COMMAND                  SERVICE    CREATED        STATUS        PORTS
+student-receiver-1   node:22-alpine   "docker-entrypoint.s…"   receiver   41 hours ago   Up 18 hours   0.0.0.0:8080->8080/tcp, :::8080->8080/tcp
+
+Проверка приложения: curl http://127.0.0.1:8080/health
+{"status":"ok","version":3,"endpoints":["/api/readings","/api/actuators","/metrics"]}
